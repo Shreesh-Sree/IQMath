@@ -2,10 +2,6 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-    throw new Error("Please define the MONGODB_URI environment variable");
-}
-
 interface MongooseCache {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
@@ -22,7 +18,12 @@ if (!global.mongoose) {
     global.mongoose = cached;
 }
 
-export async function connectToDatabase(): Promise<typeof mongoose> {
+export async function connectToDatabase(): Promise<typeof mongoose | null> {
+    if (!MONGODB_URI) {
+        console.warn("MongoDB URI not defined. Database connection disabled.");
+        return null;
+    }
+
     if (cached.conn) {
         return cached.conn;
     }
